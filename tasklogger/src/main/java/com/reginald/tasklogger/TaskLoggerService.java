@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-/**
- * Created by baidu on 15/6/9.
- */
 public class TaskLoggerService extends Service implements Handler.Callback {
 
     public static final String TASK_TAG = "$tasklogger$";
@@ -212,7 +209,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
 
     private void print() {
 
-        Log.d(TASK_TAG, "$$$$$$$$$$$$$ task info: ");
+        Log.d(TASK_TAG, "$$$$$$$$$$$$$$$$$$$$$$$$$$ task info $$$$$$$$$$$$$$$$$$$$$$$$$$ ");
 
         StringBuilder msg = new StringBuilder("");
         for (HashMap.Entry<Integer, List<TaskActivity>> entry : taskLists.entrySet()) {
@@ -239,7 +236,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
             }
         }
 
-        Log.d(TASK_TAG, "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        Log.d(TASK_TAG, "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
     }
 
     public static class TaskActivity implements Parcelable {

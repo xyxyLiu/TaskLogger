@@ -16,9 +16,6 @@ import com.reginald.tasklogger.reflect.Reflect;
 
 import static com.reginald.tasklogger.TaskLoggerService.TaskActivity;
 
-/**
- * Created by baidu on 15/6/16.
- */
 public class TaskLoggerApplication extends Application {
 
     public static final String TASK_TAG = "$tasklogger$";

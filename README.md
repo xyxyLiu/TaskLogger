@@ -6,7 +6,7 @@ TaskLogger is a simple tool to track all the Activities within your application.
 ### Usage
 
 * import the taskLogger project to your project
-* change <application> name to "com.reginald.tasklogger.TaskLoggerApplication" and add TaskLoggerService in your AndroidManifest.xml. (If you implement your own Application in your project, just make your Application extends com.reginald.tasklogger.TaskLoggerApplication)
+* change Application's name to "com.reginald.tasklogger.TaskLoggerApplication" and add TaskLoggerService in your AndroidManifest.xml. (If you implement your own Application in your project, just make your Application extends com.reginald.tasklogger.TaskLoggerApplication)
 ````xml
 <!-- your AndroidManifest.xml file -->
 <application android:name="com.reginald.tasklogger.TaskLoggerApplication"

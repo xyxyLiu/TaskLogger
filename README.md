@@ -3,9 +3,6 @@
 
 TaskLogger is a simple tool to track all the Activities within your application. The real-time activity status can be shown in the Logcat. The ONLY thing you need to do is to import taskLogger module in your project with minor modification in your AndroidManifest.xml file.
 
-### Downloads
- - [android-tasklogger-1.0.jar](https://raw.githubusercontent.com/xyxyLiu/TaskLogger/master/android-tasklogger-1.0.jar)
-
 ### Usage
 
 * import the taskLogger project to your project

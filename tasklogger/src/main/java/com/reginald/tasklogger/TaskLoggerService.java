@@ -239,19 +239,21 @@ public class TaskLoggerService extends Service implements Handler.Callback {
             case MSG_ON_ACTIVITY_RESUME: {
                 foregroundTaskId = taskActivity.taskId;
                 List<TaskActivity> list = taskLists.get(foregroundTaskId);
-                ListIterator<TaskActivity> reverseIterator = list.listIterator(list.size());
-                while (reverseIterator.hasPrevious()) {
-                    TaskActivity ta = reverseIterator.previous();
-                    if (ta.equals(taskActivity)){
-                        break;
+                if (list != null) {
+                    ListIterator<TaskActivity> reverseIterator = list.listIterator(list.size());
+                    while (reverseIterator.hasPrevious()) {
+                        TaskActivity ta = reverseIterator.previous();
+                        if (ta.equals(taskActivity)) {
+                            break;
+                        }
+                        Log.d(DEBUG_TAG, "checkTaskLists(): activity " + taskActivity.activity + " is removed from the top of task");
+                        reverseIterator.remove();
                     }
-                    Log.d(DEBUG_TAG, "checkTaskLists(): activity " + taskActivity.activity + " is removed from the top of task");
-                    reverseIterator.remove();
-                }
 
-                if (list.isEmpty()) {
-                    Log.e(TASK_TAG,"Error! please kill your application process and restart!");
-                    taskLists.remove(foregroundTaskId);
+                    if (list.isEmpty()) {
+                        Log.e(TASK_TAG, "Error! please kill your application process and restart!");
+                        taskLists.remove(foregroundTaskId);
+                    }
                 }
 
                 print();
@@ -305,8 +307,9 @@ public class TaskLoggerService extends Service implements Handler.Callback {
                 TaskActivity taskActivity = iterator.next();
                 for (ActivityManager.RunningAppProcessInfo process : activityManager.getRunningAppProcesses()) {
                     String processName = process.processName;
+                    int pid = process.pid;
                     Log.d(DEBUG_TAG, "checkTaskLists(): taskActivity = " + taskActivity.text() + " vs process = " + process.processName);
-                    if (taskActivity.processName.equals(processName)) {
+                    if (taskActivity.processName.equals(processName) && taskActivity.pid == pid) {
                         isKilled = false;
                     }
                 }

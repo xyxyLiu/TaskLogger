@@ -7,18 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.*;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -39,15 +34,16 @@ public class TaskLoggerService extends Service implements Handler.Callback {
     public static final int MSG_LAUNCH_ACTIVITY = 9;
 
     public static final SparseArray<String> STATE_MAP = new SparseArray<String>();
+
     static {
-        STATE_MAP.put(MSG_ON_ACTIVITY_CREATE,"onCreate()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_NEW_INTENT,"onNewIntent()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_RESTART,"onRestart()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_START,"onStart()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_RESUME,"onResume()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_PAUSE,"onPause()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_STOP,"onStop()");
-        STATE_MAP.put(MSG_ON_ACTIVITY_DESTROY,"onDestroy()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_CREATE, "onCreate()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_NEW_INTENT, "onNewIntent()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_RESTART, "onRestart()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_START, "onStart()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_RESUME, "onResume()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_PAUSE, "onPause()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_STOP, "onStop()");
+        STATE_MAP.put(MSG_ON_ACTIVITY_DESTROY, "onDestroy()");
     }
 
     private Map<Integer, List<TaskActivity>> taskLists;
@@ -59,6 +55,98 @@ public class TaskLoggerService extends Service implements Handler.Callback {
         Log.d(DEBUG_TAG, " new TaskLoggerService()");
     }
 
+    public static String getFlags(int flags) {
+        String res = "";
+        if ((flags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+            res += "NEW_TASK ";
+            flags &= ~Intent.FLAG_ACTIVITY_NEW_TASK;
+        }
+        if ((flags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
+            res += "MULTIPLE_TASK ";
+            flags &= ~Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+        }
+        if ((flags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0) {
+            res += "SINGLE_TOP ";
+            flags &= ~Intent.FLAG_ACTIVITY_SINGLE_TOP;
+        }
+        if ((flags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
+            res += "CLEAR_TOP ";
+            flags &= ~Intent.FLAG_ACTIVITY_CLEAR_TOP;
+        }
+        if ((flags & Intent.FLAG_ACTIVITY_CLEAR_TASK) != 0) {
+            res += "CLEAR_TASK ";
+            flags &= ~Intent.FLAG_ACTIVITY_CLEAR_TASK;
+        }
+
+        if (flags != 0) {
+            res += Integer.toHexString(flags);
+        }
+
+        return res;
+    }
+
+    public static String getOptions(int options) {
+        String res = "";
+        if ((options & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0) {
+            res += "finishOnTaskLaunch ";
+            options &= ~ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH;
+        }
+        if ((options & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0) {
+            res += "clearTaskOnLaunch ";
+            options &= ~ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH;
+        }
+        if ((options & ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE) != 0) {
+            res += "alwaysRetainTaskState ";
+            options &= ~ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE;
+        }
+        if ((options & ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0) {
+            res += "allowTaskReparenting ";
+            options &= ~ActivityInfo.FLAG_ALLOW_TASK_REPARENTING;
+        }
+        if ((options & ActivityInfo.FLAG_NO_HISTORY) != 0) {
+            res += "noHistory ";
+            options &= ~ActivityInfo.FLAG_NO_HISTORY;
+        }
+        if ((options & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            res += "hardwareAccelerated ";
+            options &= ~ActivityInfo.FLAG_HARDWARE_ACCELERATED;
+        }
+
+        if (options != 0) {
+            res += Integer.toHexString(options);
+        }
+
+        return res;
+    }
+
+    public static String getLaunchMode(int launchMode) {
+        String res = "";
+        if (launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
+            res = "standard";
+        } else if (launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
+            res = "single top";
+        } else if (launchMode == ActivityInfo.LAUNCH_SINGLE_TASK) {
+            res = "single task";
+        } else if (launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+            res = "single instance";
+        }
+
+        return res;
+
+    }
+
+    public static String getProcessName(int pid, Context context) {
+        String currentProcName = null;
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+            if (processInfo.pid == pid) {
+                currentProcName = processInfo.processName;
+                break;
+            }
+        }
+        return currentProcName;
+    }
+
     @Override
     public void onCreate() {
         Log.d(DEBUG_TAG, "TaskLoggerService.onCreate()");
@@ -67,11 +155,12 @@ public class TaskLoggerService extends Service implements Handler.Callback {
         HandlerThread thread = new HandlerThread("TaskLoggerService");
         thread.start();
         mServiceLooper = thread.getLooper();
-        mServiceHandler = new Handler(mServiceLooper,this);
+        mServiceHandler = new Handler(mServiceLooper, this);
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
+        Log.d(DEBUG_TAG, "TaskLoggerService.onDestroy()");
         super.onDestroy();
         mServiceLooper.quit();
     }
@@ -83,7 +172,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
         if (activity != null) {
             Message msg = mServiceHandler.obtainMessage();
             msg.what = intent.getIntExtra("flag", -1);
-            msg.obj  = activity;
+            msg.obj = activity;
             mServiceHandler.sendMessage(msg);
         }
         return START_NOT_STICKY;
@@ -104,7 +193,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
 
         checkTaskLists();
 
-        TaskActivity taskActivity = (TaskActivity)msg.obj;
+        TaskActivity taskActivity = (TaskActivity) msg.obj;
         showActivityState(taskActivity, msg.what);
 
 
@@ -127,28 +216,48 @@ public class TaskLoggerService extends Service implements Handler.Callback {
                 int taskId = taskActivity.taskId;
 
                 List<TaskActivity> list = taskLists.get(taskId);
-                int index = list.indexOf(new TaskActivity(taskId, activity, null));
-                if (index != -1) {
-                    list.remove(index);
-                    if (list.size() == 0)
-                        taskLists.remove(taskId);
-                }
+                if (list != null) {
+                    int index = list.indexOf(taskActivity);
+                    if (index != -1) {
+                        list.remove(index);
+                        if (list.size() == 0)
+                            taskLists.remove(taskId);
+                    }
 
-                if (taskLists.size() == 0) {
-                    foregroundTaskId = 0;
+                    if (taskLists.size() == 0) {
+                        foregroundTaskId = 0;
+                    }
                 }
 
                 print();
                 break;
             }
             case MSG_ON_ACTIVITY_NEW_INTENT:
-            case MSG_ON_ACTIVITY_RESTART:
+            case MSG_ON_ACTIVITY_RESTART:{
+                break;
+            }
             case MSG_ON_ACTIVITY_RESUME: {
                 foregroundTaskId = taskActivity.taskId;
+                List<TaskActivity> list = taskLists.get(foregroundTaskId);
+                ListIterator<TaskActivity> reverseIterator = list.listIterator(list.size());
+                while (reverseIterator.hasPrevious()) {
+                    TaskActivity ta = reverseIterator.previous();
+                    if (ta.equals(taskActivity)){
+                        break;
+                    }
+                    Log.d(DEBUG_TAG, "checkTaskLists(): activity " + taskActivity.activity + " is removed from the top of task");
+                    reverseIterator.remove();
+                }
+
+                if (list.isEmpty()) {
+                    Log.e(TASK_TAG,"Error! please kill your application process and restart!");
+                    taskLists.remove(foregroundTaskId);
+                }
+
                 print();
                 break;
             }
-            case MSG_LAUNCH_ACTIVITY:{
+            case MSG_LAUNCH_ACTIVITY: {
                 launchActivity(taskActivity);
                 break;
             }
@@ -160,9 +269,8 @@ public class TaskLoggerService extends Service implements Handler.Callback {
         return true;
     }
 
-
-    public void showActivityState(TaskActivity taskActivity, int state){
-        if (STATE_MAP.get(state) != null){
+    public void showActivityState(TaskActivity taskActivity, int state) {
+        if (STATE_MAP.get(state) != null) {
             Log.d(TASK_TAG, taskActivity.activity + " " + STATE_MAP.get(state) +
                     " in process " + taskActivity.processName + "(" + taskActivity.pid + ")");
         }
@@ -182,25 +290,56 @@ public class TaskLoggerService extends Service implements Handler.Callback {
         Log.d(TASK_TAG, String.format("launch mode = %s ,intentFlags = %s ,taskAffinity = %s ,process = %s", launchMode, intentFlags, taskAffinity, activityInfo.processName));
     }
 
+    private void checkTaskLists() {
 
-
-
-    private void checkTaskLists(){
         ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+
+        Iterator<Map.Entry<Integer, List<TaskActivity>>> entryIterator = taskLists.entrySet().iterator();
+        while (entryIterator.hasNext()) {
+            Map.Entry<Integer, List<TaskActivity>> entry = entryIterator.next();
+            int taskId = entry.getKey();
+            List<TaskActivity> tasklist = entry.getValue();
+            Iterator<TaskActivity> iterator = tasklist.iterator();
+            while (iterator.hasNext()) {
+                boolean isKilled = true;
+                TaskActivity taskActivity = iterator.next();
+                for (ActivityManager.RunningAppProcessInfo process : activityManager.getRunningAppProcesses()) {
+                    String processName = process.processName;
+                    Log.d(DEBUG_TAG, "checkTaskLists(): taskActivity = " + taskActivity.text() + " vs process = " + process.processName);
+                    if (taskActivity.processName.equals(processName)) {
+                        isKilled = false;
+                    }
+                }
+                if (isKilled) {
+                    Log.d(DEBUG_TAG, "checkTaskLists(): activity " + taskActivity.activity + " is killed by system!");
+                    iterator.remove();
+                }
+            }
+            if (tasklist.isEmpty()) {
+                Log.w(DEBUG_TAG, "checkTaskLists(): task " + taskId + " is killed! REMOVED from taskLists");
+                entryIterator.remove();
+            }
+        }
+
+
         List<ActivityManager.RunningTaskInfo> runningTaskList = activityManager.getRunningTasks(100);
 
-        for (int taskId: taskLists.keySet()){
+
+        Iterator<Integer> iterator = taskLists.keySet().iterator();
+        while (iterator.hasNext()) {
+            int taskId = iterator.next();
             boolean taskIsRunning = false;
             for (ActivityManager.RunningTaskInfo task : runningTaskList) {
                 if (taskId == task.id) {
                     Log.d(DEBUG_TAG, "checkTaskLists(): task " + taskId + " is running. base = " + task.baseActivity + " top = " + task.topActivity + " size = " + task.numActivities);
+//                    if (task.baseActivity.getClassName().equals(taskLists.get(taskId).get(0).activityInfo.name))
                     taskIsRunning = true;
                     break;
                 }
             }
             if (!taskIsRunning) {
                 Log.w(DEBUG_TAG, "checkTaskLists(): task " + taskId + " is not running! REMOVED from taskLists");
-                taskLists.remove(taskId);
+                iterator.remove();
             }
 
 
@@ -273,7 +412,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
             taskName = activityInfo.taskAffinity;
 
             pid = android.os.Process.myPid();
-            processName = getProcessName(pid,a);
+            processName = getProcessName(pid, a);
         }
 
         public TaskActivity(int taskId, String activity, String name) {
@@ -308,8 +447,8 @@ public class TaskLoggerService extends Service implements Handler.Callback {
             return "[ activity = " + activity + " , taskId = " + taskId + " , taskName = " + taskName + " ]";
         }
 
-        public String text(){
-            return  String.format(" [ %s  launchMode= %s, flags= %s, options= %s process= %s(%s) ]",
+        public String text() {
+            return String.format(" [ %s  launchMode= %s, flags= %s, options= %s process= %s(%s) ]",
                     activity, getLaunchMode(activityInfo.launchMode), getFlags(intent.getFlags()), getOptions(activityInfo.flags), processName, pid);
         }
 
@@ -320,7 +459,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
             if (((Object) this).getClass() != obj.getClass()) return false;
             TaskActivity other = (TaskActivity) obj;
 
-            if (this.activity.equals(other.activity) && this.taskId == other.taskId)
+            if (this.activity.equals(other.activity) && this.taskId == other.taskId && this.pid == other.pid)
                 return true;
             else
                 return false;
@@ -342,103 +481,6 @@ public class TaskLoggerService extends Service implements Handler.Callback {
             dest.writeInt(pid);
             dest.writeString(processName);
         }
-    }
-
-
-
-
-
-
-    public static String getFlags(int flags) {
-        String res = "";
-        if ((flags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-            res += "NEW_TASK ";
-            flags &= ~Intent.FLAG_ACTIVITY_NEW_TASK;
-        }
-        if ((flags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
-            res += "MULTIPLE_TASK ";
-            flags &= ~Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
-        }
-        if ((flags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0) {
-            res += "SINGLE_TOP ";
-            flags &= ~Intent.FLAG_ACTIVITY_SINGLE_TOP;
-        }
-        if ((flags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-            res += "CLEAR_TOP ";
-            flags &= ~Intent.FLAG_ACTIVITY_CLEAR_TOP;
-        }
-        if ((flags & Intent.FLAG_ACTIVITY_CLEAR_TASK) != 0) {
-            res += "CLEAR_TASK ";
-            flags &= ~Intent.FLAG_ACTIVITY_CLEAR_TASK;
-        }
-
-        if (flags != 0){
-            res += Integer.toHexString(flags);
-        }
-
-        return res;
-    }
-
-    public static String getOptions(int options) {
-        String res = "";
-        if ((options & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0) {
-            res += "finishOnTaskLaunch ";
-            options &= ~ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH;
-        }
-        if ((options & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0) {
-            res += "clearTaskOnLaunch ";
-            options &= ~ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH;
-        }
-        if ((options & ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE) != 0) {
-            res += "alwaysRetainTaskState ";
-            options &= ~ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE;
-        }
-        if ((options & ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0) {
-            res += "allowTaskReparenting ";
-            options &= ~ActivityInfo.FLAG_ALLOW_TASK_REPARENTING;
-        }
-        if ((options & ActivityInfo.FLAG_NO_HISTORY) != 0) {
-            res += "noHistory ";
-            options &= ~ActivityInfo.FLAG_NO_HISTORY;
-        }
-        if ((options & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
-            res += "hardwareAccelerated ";
-            options &= ~ActivityInfo.FLAG_HARDWARE_ACCELERATED;
-        }
-
-        if (options != 0){
-            res += Integer.toHexString(options);
-        }
-
-        return res;
-    }
-
-    public static String getLaunchMode(int launchMode) {
-        String res = "";
-        if (launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
-            res = "standard";
-        } else if (launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
-            res = "single top";
-        } else if (launchMode == ActivityInfo.LAUNCH_SINGLE_TASK) {
-            res = "single task";
-        } else if (launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
-            res = "single instance";
-        }
-
-        return res;
-
-    }
-
-    public static String getProcessName(int pid, Context context) {
-        String currentProcName = null;
-        ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
-            if (processInfo.pid == pid) {
-                currentProcName = processInfo.processName;
-                break;
-            }
-        }
-        return currentProcName;
     }
 
 }

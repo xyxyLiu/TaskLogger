@@ -1,7 +1,10 @@
 # TaskLogger
 
-
 TaskLogger is a simple tool to track all the Activities within your application. The real-time activity status can be shown in the Logcat. The ONLY thing you need to do is to import taskLogger module in your project with minor modification in your AndroidManifest.xml file.
+
+
+### Downloads
+ - [android-tasklogger-1.0.jar](https://github.com/xyxyLiu/TaskLogger/releases/download/1.0/android-tasklogger-1.0.jar)
 
 ### Usage
 
@@ -23,13 +26,13 @@ TaskLogger is a simple tool to track all the Activities within your application.
 </application>
 
 ````
-* If "minifyEnabled" is true in your build.gradle file, please add the following line to your proguard file
+* Please add the following line to your proguard file, if Proguard is enabled in your project.
 ````text
 -keep public class com.reginald.tasklogger.TaskLoggerApplication$TaskLoggerInstrumentation { *; }
 ````
 
 ### Output
-Use "$taskLogger" as filter in Logcat to see the output, which contains(see figure below):
+Use "$taskLogger$" as filter in Logcat to see the output, which contains(see figure below):
 * activity attributes(name, launchMode, intent flags, process info, other attributes defined in AndroidManifest)
 * activity lifecycle callbacks (onCreate(),onResume(), ....... ), and jumps between activities(startActivity())
 * tasks and back stack status

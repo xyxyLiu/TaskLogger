@@ -12,6 +12,10 @@ TaskLogger is a simple tool to track all the Activities within your application.
 * change Application's name to "com.reginald.tasklogger.TaskLoggerApplication" and add TaskLoggerService in your AndroidManifest.xml. (If you implement your own Application in your project, just make your Application extends com.reginald.tasklogger.TaskLoggerApplication)
 ````xml
 <!-- your AndroidManifest.xml file -->
+
+<!-- DO NOT FORGET TO ADD THIS PERMISSION -->
+<uses-permission android:name="android.permission.GET_TASKS"/>
+
 <application android:name="com.reginald.tasklogger.TaskLoggerApplication"
               ...............
               ...............
@@ -30,6 +34,8 @@ TaskLogger is a simple tool to track all the Activities within your application.
 ````text
 -keep public class com.reginald.tasklogger.TaskLoggerApplication$TaskLoggerInstrumentation { *; }
 ````
+
+For more details, see the sample in the project.
 
 ### Output
 Use "$taskLogger$" as filter in Logcat to see the output, which contains(see figure below):

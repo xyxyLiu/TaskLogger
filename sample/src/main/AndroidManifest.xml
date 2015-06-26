@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.reginald.tasklogger.sample" >
+    <!-- change/add your name of application name to com.reginald.tasklogger.TaskLoggerApplication -->
+
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+
+    <application
+        android:name="com.reginald.tasklogger.TaskLoggerApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="TaskLogger Demo"
+        android:theme="@android:style/Theme.Light"
+        >
+
+        <!-- TaskLogger service will be running in a separate process. -->
+        <service
+            android:name="com.reginald.tasklogger.TaskLoggerService"
+            android:process=":tasklogger" />
+
+        <!--
+        you can try change process, launchMode, taskAffinity, finishOnTaskLaunch, noHistory .....
+        to see different output with TaskLogger in Logcat.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:label="TaskLogger Demo" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ActivityA"
+            android:finishOnTaskLaunch="true"
+            android:label="A"
+            android:launchMode="standard"
+            android:process=":activityTest"
+            android:screenOrientation="portrait"
+            android:taskAffinity=".task1" >
+        </activity>
+        <activity
+            android:name=".ActivityB"
+            android:label="B"
+            android:launchMode="singleTop"
+            android:noHistory="true"
+            android:process=":activityTest"
+            android:screenOrientation="portrait"
+            android:taskAffinity=".task2" >
+        </activity>
+
+    </application>
+
+</manifest>

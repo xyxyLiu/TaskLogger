@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description">
+        Use "$taskLogger$" as filter in Logcat to see the output, which contains:\n\n
+
+    1) activity attributes(name, launchMode, intent flags, process info, other attributes defined in AndroidManifest) \n\n
+    2) activity lifecycle callbacks (onCreate(),onResume(), ....... ), and jumps between activities(startActivity()) \n\n
+    3) tasks and back stack status \n\n\n
+
+        Try different intent flags, which can be configured in menu within Activity A, B:\n
+        * FLAG_ACTIVITY_NEW_TASK\n
+        * FLAG_ACTIVITY_MULTIPLE_TASK\n
+        * FLAG_ACTIVITY_CLEAR_TOP\n
+        * FLAG_ACTIVITY_CLEAR_TASK\n
+        * FLAG_ACTIVITY_SINGLE_TOP\n
+    </string>
+</resources>
+

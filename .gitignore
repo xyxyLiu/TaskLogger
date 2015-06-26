@@ -19,5 +19,3 @@ jni/*/obj/*
 
 # MAC auto-gen files
 .DS_Store
-
-res/

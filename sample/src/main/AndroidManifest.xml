@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.reginald.tasklogger.sample" >
-    <!-- change/add your name of application name to com.reginald.tasklogger.TaskLoggerApplication -->
+
 
     <uses-permission android:name="android.permission.GET_TASKS"/>
 
+    <!-- change/add your name of application name to com.reginald.tasklogger.TaskLoggerApplication -->
     <application
         android:name="com.reginald.tasklogger.TaskLoggerApplication"
         android:allowBackup="true"
@@ -19,7 +20,7 @@
             android:process=":tasklogger" />
 
         <!--
-        you can try change process, launchMode, taskAffinity, finishOnTaskLaunch, noHistory .....
+        you can try changing process, launchMode, taskAffinity, finishOnTaskLaunch, noHistory .....
         to see different output with TaskLogger in Logcat.
         -->
         <activity

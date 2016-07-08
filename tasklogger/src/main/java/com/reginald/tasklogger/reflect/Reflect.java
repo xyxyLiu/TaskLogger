@@ -18,7 +18,6 @@ import java.util.Map;
  * 概述<br>
  * 一套新颖的反射工具类，
  * 能够轻松实现反射，并使代码具有强可读性。
- *
  * @author lody
  */
 public class Reflect {
@@ -29,7 +28,6 @@ public class Reflect {
      * 封装Class.forName(name)
      * <p/>
      * 可以这样调用: <code>on(Class.forName(name))</code>
-     *
      * @param name 完整类名
      * @return 工具类自身
      * @throws ReflectException 反射时发生的异常
@@ -43,7 +41,6 @@ public class Reflect {
      * 封装Class.forName(name)
      * <p/>
      * 可以这样调用: <code>on(Xxx.class)</code>
-     *
      * @param clazz 类
      * @return 工具类自身
      * @throws ReflectException 反射时发生的异常
@@ -58,7 +55,6 @@ public class Reflect {
      * <p/>
      * 当你需要访问实例的字段和方法时可以使用此方法
      * {@link Object}
-     *
      * @param object 需要被包装的对象
      * @return 工具类自身
      */
@@ -73,7 +69,6 @@ public class Reflect {
      * 原因在于调用前Java会检查是否具有可访问权限，
      * 当调用此方法后，
      * 访问权限检查机制将被关闭。
-     *
      * @param accessible 受访问限制的对象
      * @return 不受访问限制的对象
      */
@@ -147,8 +142,7 @@ public class Reflect {
      * 等价于 {@link Field#set(Object, Object)}. 如果包装的对象是一个
      * {@link Class}, 那么修改的将是一个静态字段，
      * 如果包装的对象是一个{@link Object}, 那么修改的就是一个实例字段。
-     *
-     * @param name  字段名
+     * @param name 字段名
      * @param value 字段的值
      * @return 完事后的工具类
      * @throws ReflectException
@@ -165,7 +159,6 @@ public class Reflect {
 
     /**
      * 得到字段对值
-     *
      * @param name 字段名
      * @return The field value
      * @throws ReflectException
@@ -177,7 +170,6 @@ public class Reflect {
 
     /**
      * 取得字段
-     *
      * @param name 字段名
      * @return 字段
      * @throws ReflectException
@@ -217,7 +209,6 @@ public class Reflect {
 
     /**
      * 将一个对象的所有对象映射到一个Map中,key为字段名。
-     *
      * @return 包含所有字段的map
      */
     public Map<String, Reflect> fields() {
@@ -245,7 +236,6 @@ public class Reflect {
      * 给定方法名称，调用无参方法
      * <p/>
      * 等价于 <code>call(name, new Object[0])</code>
-     *
      * @param name 方法名
      * @return 工具类自身
      * @throws ReflectException
@@ -259,7 +249,6 @@ public class Reflect {
      * 给定方法名和参数，调用一个方法。
      * <p/>
      * 封装自 {@link Method#invoke(Object, Object...)}, 可以接受基本类型
-     *
      * @param name 方法名
      * @param args 方法参数
      * @return 工具类自身
@@ -297,7 +286,7 @@ public class Reflect {
 
         // 先尝试直接调用
         try {
-            showMethod(name,types);
+            showMethod(name, types);
             return type.getMethod(name, types);
         }
 
@@ -358,7 +347,6 @@ public class Reflect {
      * 调用一个无参构造器
      * <p/>
      * 等价于 <code>create(new Object[0])</code>
-     *
      * @return 工具类自身
      * @throws ReflectException
      * @see #create(Object...)
@@ -369,7 +357,6 @@ public class Reflect {
 
     /**
      * 调用一个有参构造器
-     *
      * @param args 构造器参数
      * @return 工具类自身
      * @throws ReflectException
@@ -398,7 +385,6 @@ public class Reflect {
 
     /**
      * 为包装的对象创建一个代理。
-     *
      * @param proxyType 代理类型
      * @return 包装对象的代理者。
      */
@@ -519,7 +505,7 @@ public class Reflect {
                 return on(method.invoke(object, args));
             }
         } catch (Exception e) {
-           throw new ReflectException(e);
+            throw new ReflectException(e);
         }
     }
 
@@ -536,7 +522,6 @@ public class Reflect {
 
     /**
      * 内部类， 给定一系列参数，返回它们的类型
-     *
      * @see Object#getClass()
      */
     private static Class<?>[] types(Object... values) {
@@ -557,7 +542,6 @@ public class Reflect {
 
     /**
      * 加载一个类
-     *
      * @see Class#forName(String)
      */
     private static Class<?> forName(String name) throws ReflectException {
@@ -570,7 +554,6 @@ public class Reflect {
 
     /**
      * 获取包装的对象的类型
-     *
      * @see Object#getClass()
      */
     public Class<?> type() {
@@ -621,18 +604,18 @@ public class Reflect {
     }
 
 
-    public static void showMethod(Method method){
-        showMethod(method.getName(),method.getParameterTypes());
+    public static void showMethod(Method method) {
+        showMethod(method.getName(), method.getParameterTypes());
     }
 
 
-    public static void showMethod(String name, Class<?>[] types){
+    public static void showMethod(String name, Class<?>[] types) {
         StringBuilder msg = new StringBuilder(name + "( ");
-        for (Class<?> t : types){
+        for (Class<?> t : types) {
             msg.append(t.getName() + ", ");
         }
         if (types.length != 0)
-            msg.delete(msg.length()-2,msg.length());
+            msg.delete(msg.length() - 2, msg.length());
         msg.append(")");
         Log.d(TAG, msg.toString());
     }

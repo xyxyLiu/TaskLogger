@@ -4,12 +4,12 @@ TaskLogger is a simple tool to track all the Activities within your application.
 
 
 ### Downloads
- - [android-tasklogger-1.0.jar](https://github.com/xyxyLiu/TaskLogger/releases/download/1.0/android-tasklogger-1.0.jar)
+ - [android-tasklogger-1.1.jar](https://github.com/xyxyLiu/TaskLogger/releases/download/1.1/android-tasklogger-1.1.jar)
 
 ### Usage
 
 * import the taskLogger project to your project
-* change Application's name to "com.reginald.tasklogger.TaskLoggerApplication" and add TaskLoggerService in your AndroidManifest.xml. (If you implement your own Application in your project, just make your Application extends com.reginald.tasklogger.TaskLoggerApplication)
+* change Application's name to "com.reginald.tasklogger.TaskLoggerApplication" and add TaskLoggerService in your AndroidManifest.xml.
 ````xml
 <!-- your AndroidManifest.xml file -->
 
@@ -30,6 +30,26 @@ TaskLogger is a simple tool to track all the Activities within your application.
 </application>
 
 ````
+
+If you implement your own Application in your project, use TaskLogger.init() in your Application.attachBaseContext(context):
+````java
+public class YourApplication extends Application {
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+
+        // added here!
+        TaskLogger.init(this);
+        ......
+    }
+
+    ......
+}
+````
+
+
+
 * Please add the following line to your proguard file, if Proguard is enabled in your project.
 ````text
 -keep public class com.reginald.tasklogger.TaskLoggerApplication$TaskLoggerInstrumentation { *; }
@@ -44,6 +64,12 @@ Use "$taskLogger$" as filter in Logcat to see the output, which contains(see fig
 * tasks and back stack status
 
 <img src="https://raw.githubusercontent.com/xyxyLiu/TaskLogger/master/output1.png" alt="Screenshot"/>
+
+
+### Change log
+* 1.0 first release
+* 1.1 add TaskLogger.init()
+
 
 ### Apache License
 

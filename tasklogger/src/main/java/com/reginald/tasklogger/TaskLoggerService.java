@@ -7,7 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
-import android.os.*;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -233,7 +239,7 @@ public class TaskLoggerService extends Service implements Handler.Callback {
                 break;
             }
             case MSG_ON_ACTIVITY_NEW_INTENT:
-            case MSG_ON_ACTIVITY_RESTART:{
+            case MSG_ON_ACTIVITY_RESTART: {
                 break;
             }
             case MSG_ON_ACTIVITY_RESUME: {
